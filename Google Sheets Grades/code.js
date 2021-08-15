@@ -128,6 +128,8 @@ function updateGrades() {
                 continue;
             let score = getScore(log);
             if(score.length > 0) {
+                // score have the scores for each task and exercise
+                // until this commit. The last commit is the most recent
                 Logger.log(logs_url);
                 Logger.log(score);
                 for(let task of score) {

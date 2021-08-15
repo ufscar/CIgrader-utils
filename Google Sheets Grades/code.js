@@ -1,12 +1,13 @@
-const github_user = getSecret('github_user');
+const github_user = getSecret('github_user');//professor username
 const github_token = getSecret('github_token');//Github token with workflow scope
 const user_token = Utilities.base64Encode(github_user+':'+github_token);
 const headers = {'Authorization': 'Basic ' + user_token};
 const get_params = {method: 'GET', headers: headers};
 
-const prof_github = 'afsmaira/ufscar-2021-1-PA-listas';
+const prof_repo = 'ufscar-2021-1-PA-listas';
+const prof_github = github_user+' '+prof_repo;
 // github where ther graders are
-const ci_hash = '258edc996d140118ea340b5d97bc3aa47f46dad6';
+const ci_hash = '3e4b21db7dcafa2717b46259ee9b8dc63b487855';
 // sha of .github folder in the student github
 
 const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -18,6 +19,13 @@ const col_mail = 3;
 const col_class = 4;
 const col_git = 5;
 const data_cols = 5;
+
+function onOpen() {
+    let ui = SpreadsheetApp.getUi();
+    ui.createMenu('Atualizar')
+        .addItem('Notas', 'updateGrades')
+        .addToUi();
+}
 
 function checkProfGithub(log, logs_url) {
     let prof_githubs = log.match(/PROFESSOR GITHUB: ([^\n]+)/g) || [];
@@ -40,7 +48,7 @@ function checkCIcommits(github) {
     let commits = JSON.parse(r.getContentText())
         .map(commit => commit.commit.committer)
         .filter(commit => commit.name !== github_user)
-    if(commits.length > 1) {
+    if(commits.length > 0) {
         Logger.log('CI files commited by student!');
         return false;
     }

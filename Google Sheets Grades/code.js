@@ -29,7 +29,7 @@ function onOpen() {
 
 function checkProfGithub(log, logs_url) {
     let prof_githubs = log.match(/PROFESSOR GITHUB: ([^\n]+)/g) || [];
-    if(prof_githubs.length != 1) {
+    if(prof_githubs.length !== 1) {
         Logger.log(logs_url);
         Logger.log('Professor github modified!');
         return false;
@@ -58,7 +58,7 @@ function checkCIcommits(github) {
 function checkCIhash(github) {
     let r = UrlFetchApp.fetch('https://api.github.com/repos/'+github+'/contents', get_params);
     let h = JSON.parse(r.getContentText())
-        .filter(f => (f.name == ".github" && f.type == "dir"))
+        .filter(f => (f.name === ".github" && f.type === "dir"))
         .map(f => f.sha)
     if(h.length !== 1) {
         Logger.log('Hash verification error!')

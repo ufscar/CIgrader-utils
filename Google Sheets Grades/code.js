@@ -4,17 +4,20 @@ const user_token = Utilities.base64Encode(github_user+':'+github_token);
 const headers = {'Authorization': 'Basic ' + user_token};
 const get_params = {method: 'GET', headers: headers};
 
-const prof_github = 'ufscar/CIgrader-professor';
+const prof_github = 'afsmaira/ufscar-2021-1-PA-listas';
 // github where ther graders are
-const ci_hash = 'd8df5f64216fffbddc328e806868a57f22150388';
+const ci_hash = '258edc996d140118ea340b5d97bc3aa47f46dad6';
 // sha of .github folder in the student github
 
 const ss = SpreadsheetApp.getActiveSpreadsheet();
-const sh = ss.getActiveSheet();
+const sh = ss.getSheetByName('Notas');
 
-const col_name = 0;
-const col_mail = 1;
-const col_git = 2;
+const col_ra = 1;
+const col_name = 2;
+const col_mail = 3;
+const col_class = 4;
+const col_git = 5;
+const data_cols = 5;
 
 function checkProfGithub(log, logs_url) {
     let prof_githubs = log.match(/PROFESSOR GITHUB: ([^\n]+)/g) || [];
@@ -92,13 +95,17 @@ function getGraderLog(url) {
 function updateGrades() {
     let nome, email, github, aux;
     for(let row=2; ; row++) {
-        dados = sh.getRange(row, 1, 1, 3).getValues()[0];
-        nome = dados[col_name];
-        if(nome.length === 0)
+        dados = sh.getRange(row, 1, 1, data_cols).getValues()[0];
+        ra = dados[col_ra-1];
+        if(ra.length === 0)
             break;
+        nome = dados[col_name-1];
         Logger.log(nome);
-        email = dados[col_mail];
-        github = dados[col_git];
+        email = dados[col_mail-1];
+        clas = dados[col_class-1];
+        github = dados[col_git-1];
+        if(github.length === 0)
+            continue;
         if(!checkCIcommits(github) || !checkCIhash(github))
             continue;
         let logs_urls = getRuns(github)

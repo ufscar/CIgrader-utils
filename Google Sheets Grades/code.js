@@ -45,9 +45,10 @@ function checkProfGithub(log, logs_url) {
 
 function checkCIcommits(github) {
     let r = UrlFetchApp.fetch('https://api.github.com/repos/'+github+'/commits?path=.github&page=1&per_page=100', get_params);
+    let student_user = github.split("/")[0];
     let commits = JSON.parse(r.getContentText())
         .map(commit => commit.commit.committer)
-        .filter(commit => commit.name !== github_user)
+        .filter(commit => commit.name === student_user)
     if(commits.length > 0) {
         Logger.log('CI files commited by student!');
         return false;

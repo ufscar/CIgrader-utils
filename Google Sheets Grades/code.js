@@ -44,11 +44,11 @@ function checkProfGithub(log, logs_url) {
 }
 
 function checkCIcommits(github) {
-    let r = UrlFetchApp.fetch('https://api.github.com/repos/'+github+'/commits?path=.github&page=1&per_page=100', get_params);
-    let student_user = github.split("/")[0];
+    let url = 'https://api.github.com/repos/'+github+'/commits?path=.github&page=1&per_page=100';
+    let r = UrlFetchApp.fetch(url, get_params);
     let commits = JSON.parse(r.getContentText())
         .map(commit => commit.commit.committer)
-        .filter(commit => commit.name === student_user)
+        .filter(commit => commit.name !== github_user)
     if(commits.length > 0) {
         Logger.log('CI files commited by student!');
         return false;
@@ -101,9 +101,28 @@ function getGraderLog(url) {
     return "";
 }
 
+function taskColumn(task) {
+    task = task.toString().trim();
+    for(let col=data_cols; ; col++) {
+        let head = sh.getRange(1, col).getValue().toString().trim();
+        if(head === task)
+            return col;
+        if(head.length === 0)
+            return null;
+    }
+}
+
+function colorRow(row, color='#fffbe3') {
+    sh.getRange(row.toString()+":"+row.toString()).setBackground(color);
+    SpreadsheetApp.flush();
+}
+
 function updateGrades() {
-    let nome, email, github, aux;
-    for(let row=2; ; row++) {
+    let nome, github, aux;
+    let task_cols = JSON.parse('{}');
+    let nrwos = sh.getLastRow();
+    for(let row=2; row <= nrwos; row++) {
+        colorRow(row);
         dados = sh.getRange(row, 1, 1, data_cols).getValues()[0];
         ra = dados[col_ra-1];
         if(ra.length === 0)
@@ -113,13 +132,19 @@ function updateGrades() {
         email = dados[col_mail-1];
         clas = dados[col_class-1];
         github = dados[col_git-1];
-        if(github.length === 0)
+        if(github.length === 0) {
+            colorRow(row, null);
             continue;
-        if(!checkCIcommits(github) || !checkCIhash(github))
+        }
+        if(!checkCIcommits(github) || !checkCIhash(github)) {
+            sh.getRange(r, col_git).setBackground("red");
+            colorRow(row, null);
             continue;
+        }
         let logs_urls = getRuns(github)
         let n = logs_urls.length;
         let i0 = Math.min(n-1, 10);
+        let student = JSON.parse('{}');
         for(let i=i0; i>=0; i--) {
             logs_url = logs_urls[i]["logs_url"];
             let log = getGraderLog(logs_url)
@@ -138,10 +163,16 @@ function updateGrades() {
                     let task_score = 0;
                     for(let ex in task["scores"])
                         task_score += task["scores"][ex];
-                    Logger.log(task_name+': '+task_score.toString());
+                    student[task_name] = task_score;
+                    if(!task_cols[task_name])
+                        task_cols[task_name] = taskColumn(task_name);
                 }
             }
         }
+        for(let task in student)
+            sh.getRange(row, task_cols[task]).setValue(student[task]);
+
+        colorRow(row, null);
     }
 }
 

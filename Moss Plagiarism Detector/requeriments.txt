@@ -1,1 +1,6 @@
-optparse
+argparse
+mosspy
+python-dotenv
+requests
+github3
+tempfile

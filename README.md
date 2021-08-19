@@ -8,6 +8,15 @@
 python3 check_plagiarism.py --help
 ```
 
+Use example:
+
+```shell
+python3 check_plagiarism.py \
+  -l python \
+  -s <sheet_id> \
+  -t lista01
+```
+
 ### Environment Variables
 
 - **MOSS_USER**: User id in moss service ([https://theory.stanford.edu/~aiken/moss/](https://theory.stanford.edu/~aiken/moss/))
@@ -23,6 +32,14 @@ Example of script for Google Sheets automation. It depends on Worksheet template
 
 ```shell
 python3 ci_fixer.py --help
+```
+
+Use example:
+
+```shell
+python3 ci_fixer.py \
+  -s <sheet_id> \
+  -p .github/workflows/grade.py -p .github/workflows/main.yml
 ```
 
 ### Environment Variables

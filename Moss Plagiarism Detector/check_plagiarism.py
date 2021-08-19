@@ -9,7 +9,7 @@ import dotenv
 
 
 def parse_input():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description="Check for plagiarism one task of all students")
     parser.add_argument("-l", "--language", dest="lang", required=True,
                         help="Files programming language")
     parser.add_argument("-t", "--task", dest="task", required=True,

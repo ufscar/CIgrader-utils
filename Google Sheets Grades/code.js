@@ -51,14 +51,22 @@ function checkProfGithub(log, logs_url) {
 }
 
 function checkCIcommits(github, n0=0) {
-    let url = 'https://api.github.com/repos/'+github+'/commits?path=.github&page=1&per_page=100';
-    let r = UrlFetchApp.fetch(url, get_params);
-    let commits = JSON.parse(r.getContentText())
-        .map(commit => commit.commit.committer)
-        .filter(commit => (commit.name !== github_user && commit.name !== "GitHub"))
-    if(commits.length != n0) {
-        Logger.log('CI files commited by student '+commits.length.toString()+' times!');
-        Logger.log(commits);
+    let commits = [];
+    let all = [];
+    let url, r, js;
+    let p = 1, n_c = 1;
+    while(n_c > 0 || p == 1) {
+        url = 'https://api.github.com/repos/'+github+'/commits?path=%2Egithub&page='+p.toString()+'&per_page=100';
+        r = UrlFetchApp.fetch(url, get_params);
+        js = JSON.parse(r.getContentText())
+        n_c = js.length;
+        commits = js.filter(commit => commit.author.login !== github_user);
+        all = all.concat(commits);
+        p = p+1;
+    }
+    if(all.length != n0) {
+        Logger.log('CI files commited by student '+all.length.toString()+' times!');
+        Logger.log(all);
         return false;
     }
     return true;

@@ -7,8 +7,9 @@ const get_params = {method: 'GET', headers: headers};
 const prof_repo = 'ufscar-2021-1-PA-listas';
 const prof_github = github_user+' '+prof_repo;
 // github where ther graders are
-const ci_hash = '3e4b21db7dcafa2717b46259ee9b8dc63b487855';
+const ci_hash = getCIhash('ufscar/CIgrader');
 // sha of .github folder in the student github
+// Change it if using another source
 
 const ss = SpreadsheetApp.getActiveSpreadsheet();
 const sh = ss.getSheetByName('Notas');
@@ -18,7 +19,13 @@ const col_name = 2;
 const col_mail = 3;
 const col_class = 4;
 const col_git = 5;
-const data_cols = 5;
+const col_invite = 6;
+const col_edit_ci = 7;
+const col_n_ci_commits = 8;
+const data_cols = 8;
+
+const grade_commits_n = 4;
+
 
 function onOpen() {
     let ui = SpreadsheetApp.getUi();
@@ -43,32 +50,32 @@ function checkProfGithub(log, logs_url) {
     return true;
 }
 
-function checkCIcommits(github) {
+function checkCIcommits(github, n0=0) {
     let url = 'https://api.github.com/repos/'+github+'/commits?path=.github&page=1&per_page=100';
     let r = UrlFetchApp.fetch(url, get_params);
     let commits = JSON.parse(r.getContentText())
         .map(commit => commit.commit.committer)
         .filter(commit => commit.name !== github_user)
-    if(commits.length > 0) {
-        Logger.log('CI files commited by student!');
+    if(commits.length > n0) {
+        Logger.log('CI files commited by student '+commits.length.toString()+' times!');
         return false;
     }
     return true;
 }
 
-function checkCIhash(github) {
+function getCIhash(github) {
     let r = UrlFetchApp.fetch('https://api.github.com/repos/'+github+'/contents', get_params);
-    let h = JSON.parse(r.getContentText())
+    return JSON.parse(r.getContentText())
         .filter(f => (f.name === ".github" && f.type === "dir"))
-        .map(f => f.sha)
-    if(h.length !== 1) {
-        Logger.log('Hash verification error!')
-        return false;
-    }
-    if(h[0] !== ci_hash) {
+        .map(f => f.sha)[0];
+}
+
+function checkCIhash(github) {
+    let h = getCIhash(github);
+    if(h !== ci_hash) {
         Logger.log('CI files sha unknown!');
-        Logger.log(h[0]);
-        Logger.log(ci_hash);
+        Logger.log('Expected: '+ci_hash);
+        Logger.log('Found: '+h);
         return false;
     }
     return true;
@@ -91,13 +98,15 @@ function getRuns(github) {
 }
 
 function getGraderLog(url) {
-    r = UrlFetchApp.fetch(url, get_params);
-    let zip = r.getBlob();
-    let log_file = Utilities.unzip(zip).filter(f => f.getName().includes('Grader'));
-    if(log_file.length > 0) {
-        log_file = log_file[0];
-        return log_file.getDataAsString().trim();
-    }
+    try {
+        r = UrlFetchApp.fetch(url, get_params);
+        let zip = r.getBlob();
+        let log_file = Utilities.unzip(zip).filter(f => f.getName().includes('Grader'));
+        if(log_file.length > 0) {
+            log_file = log_file[0];
+            return log_file.getDataAsString().trim();
+        }
+    } catch(e) {}
     return "";
 }
 
@@ -132,18 +141,19 @@ function updateGrades() {
         email = dados[col_mail-1];
         clas = dados[col_class-1];
         github = dados[col_git-1];
-        if(github.length === 0) {
+        if(github.length === 0 || !dados[col_invite-1]) {
             colorRow(row, null);
             continue;
         }
-        if(!checkCIcommits(github) || !checkCIhash(github)) {
-            sh.getRange(r, col_git).setBackground("red");
+        let n_ci_commits = sh.getRange(row, col_n_ci_commits).getValue();
+        if(nome !== 'Eu' && (!checkCIcommits(github, n_ci_commits) || !checkCIhash(github))) {
+            sh.getRange(row, col_edit_ci).setValue(true);
             colorRow(row, null);
             continue;
         }
         let logs_urls = getRuns(github)
         let n = logs_urls.length;
-        let i0 = Math.min(n-1, 10);
+        let i0 = Math.min(n-1, grade_commits_n);
         let student = JSON.parse('{}');
         for(let i=i0; i>=0; i--) {
             logs_url = logs_urls[i]["logs_url"];
@@ -170,7 +180,8 @@ function updateGrades() {
             }
         }
         for(let task in student)
-            sh.getRange(row, task_cols[task]).setValue(student[task]);
+            if(task_cols[task])
+                sh.getRange(row, task_cols[task]).setValue(student[task]);
 
         colorRow(row, null);
     }
@@ -183,4 +194,8 @@ function setSecrets() {
 
 function getSecret(key) {
     return PropertiesService.getUserProperties().getProperty(key);
+}
+
+function test() {
+    Logger.log(getSecret('github_token'));
 }

@@ -55,9 +55,10 @@ function checkCIcommits(github, n0=0) {
     let r = UrlFetchApp.fetch(url, get_params);
     let commits = JSON.parse(r.getContentText())
         .map(commit => commit.commit.committer)
-        .filter(commit => commit.name !== github_user)
-    if(commits.length > n0) {
+        .filter(commit => (commit.name !== github_user && commit.name !== "GitHub"))
+    if(commits.length != n0) {
         Logger.log('CI files commited by student '+commits.length.toString()+' times!');
+        Logger.log(commits);
         return false;
     }
     return true;

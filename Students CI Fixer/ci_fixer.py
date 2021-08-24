@@ -41,6 +41,7 @@ def update_files(students, prof, files):
         file_contents = prof_repo.file_contents(path=files[i])
         files[i] = (files[i], file_contents.sha, file_contents.decoded)
     for own_repo in students:
+        print(own_repo)
         student, repo = own_repo.split('/')
         try:
             repo = git.repository(student, repo)

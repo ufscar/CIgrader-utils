@@ -60,6 +60,8 @@ def download_files(task, githubs, folder):
     for own_repo in githubs:
         print(own_repo, end='\t')
         student, repo = own_repo.split('/')
+        if repo.endswith('.git'):
+            repo = repo[:-4]
         try:
             repo = git.repository(student, repo)
             repo_tasks = [f[0] for f in repo.directory_contents('')]

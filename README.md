@@ -46,3 +46,19 @@ python3 ci_fixer.py \
 
 - **GITHUB_TOKEN**: Github token with **workflow** permission
 
+## Regrade All
+
+Regrades all tasks of all students
+
+### Help
+
+```shell
+python3 regrade_all.py --help
+```
+
+Use example:
+
+```shell
+python3 regrade_all.py -s <sheet_id>
+```
+

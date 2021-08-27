@@ -1,6 +1,5 @@
 import re
 import os
-import mosspy
 import argparse
 import requests
 import github3

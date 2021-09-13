@@ -33,6 +33,8 @@ def parse_input():
                         help="Students to be checked (github usernames)")
     parser.add_argument("-S", "--show", dest="show", action='store_true', default=False,
                         help="Show results in standard output")
+    parser.add_argument("-X", "--exclude-files", dest="excf", action='append', default=[],
+                        help="Files not to be checked")
 
     args = parser.parse_args()
     if args.file is not None and not os.path.exists(args.file):
@@ -73,10 +75,12 @@ def check_plagiarism(pattern, language, output_folder=None, show=False, min=0):
             student2 = line[4].split('/')[3]
             url = line[1]
             x = max(int(line[3]), int(line[5]))
+            file1 = line[2].split('/')[-1].strip()
+            file2 = line[4].split('/')[-1].strip()
             if student1 == student2 or x < min:
                 html = html.replace(line[0], '')
             else:
-                l.append((x, f'{student1} / {student2} ({x}%) => {url}'))
+                l.append((x, f'{student1} ({file1}) / {student2} ({file2}) ({x}%) =>\t{url}'))
         output = '\n'.join(line for _, line in sorted(l)[::-1])
         print(output)
         if output_folder is None:
@@ -87,7 +91,9 @@ def check_plagiarism(pattern, language, output_folder=None, show=False, min=0):
     return url
 
 
-def download_files(task, githubs, folder):
+def download_files(task, githubs, folder, exclude_files=None):
+    if exclude_files is None:
+        exclude_files = []
     git = github3.GitHub(token=os.getenv('GITHUB_TOKEN'))
     for own_repo in githubs:
         print(own_repo, end='\t')
@@ -103,8 +109,9 @@ def download_files(task, githubs, folder):
                     os.makedirs(student_folder)
                 exs = repo.directory_contents(task)
                 for ex in exs:
-                    with open(os.path.join(student_folder, ex[0]), 'wb') as f:
-                        f.write(repo.file_contents(ex[1].path).decoded)
+                    if ex[0] not in exclude_files:
+                        with open(os.path.join(student_folder, ex[0]), 'wb') as f:
+                            f.write(repo.file_contents(ex[1].path).decoded)
             print()
         except github3.exceptions.NotFoundError as err:
             print(f'NOT FOUND: {err}')
@@ -129,7 +136,8 @@ if __name__ == '__main__':
     if len(args.only) > 0:
         githubs = [g for g in githubs if g.split('/')[0] in args.only]
     with tempfile.TemporaryDirectory() as folder:
-        download_files(args.task, githubs, folder)
+        download_files(args.task, githubs, folder,
+                       exclude_files=args.excf)
         url = check_plagiarism(os.path.join(folder, "*", "ex*.py"),
                                language=args.lang,
                                output_folder=args.out,

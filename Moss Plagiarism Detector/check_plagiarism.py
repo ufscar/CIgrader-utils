@@ -55,7 +55,7 @@ def check_plagiarism(pattern, language, output_folder=None, show=False, min=0):
     print()
 
     if output_folder is not None:
-        m.saveWebPage(url, "report.html")
+        m.saveWebPage(url, report_html)
         mosspy.download_report(url,
                                output_folder,
                                connections=8,
@@ -64,8 +64,8 @@ def check_plagiarism(pattern, language, output_folder=None, show=False, min=0):
                                )
         print()
     if show:
-        m.saveWebPage(url, "report.html")
-        with open("report.html") as f:
+        m.saveWebPage(url, report_html)
+        with open(report_html) as f:
             html = f.read()
         l = list()
         for line in re.findall(r'(<TR><TD><A HREF="(http://moss\.stanford\.edu/results/[^"]+)">([^(]+)\((\d+)%\)</A>\s*<TD><A HREF="http://moss\.stanford\.edu/results/[^"]+">([^(]+)\((\d+)%\)</A>\s*<TD ALIGN=right>\d+)', html):

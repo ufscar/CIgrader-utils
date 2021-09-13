@@ -22,6 +22,14 @@ def parse_input():
                             "github links (https://github.com/[^/]+/[^/]+)")
     parser.add_argument("-o", "--out", dest="out",
                         help="Output folder (default is empty, prints only url)")
+    parser.add_argument("-m", "--min", dest="min", type=int, default=0,
+                        help="Minimum similarity to be shown")
+    parser.add_argument("-x", "--exclude", dest="exc", action='append', default=[],
+                        help="Students not to be checked (github usernames)")
+    parser.add_argument("-i", "--only", dest="only", action='append', default=[],
+                        help="Students to be checked (github usernames)")
+    parser.add_argument("-S", "--show", dest="show", action='store_true', default=False,
+                        help="Show results in standard output")
 
     args = parser.parse_args()
     if args.file is not None and not os.path.exists(args.file):
@@ -34,7 +42,7 @@ def parse_input():
     return args
 
 
-def check_plagiarism(pattern, language, output_folder=None):
+def check_plagiarism(pattern, language, output_folder=None, show=False, min=0):
     userid = int(os.getenv('MOSS_USER'))
 
     m = mosspy.Moss(userid, language)
@@ -52,6 +60,23 @@ def check_plagiarism(pattern, language, output_folder=None):
                                on_read=lambda url: print('*', end='', flush=True)
                                )
         print()
+    if show:
+        m.saveWebPage(url, "report.html")
+        with open("report.html") as f:
+            html = f.read()
+        for line in re.findall(r'(<TR><TD><A HREF="(http://moss\.stanford\.edu/results/[^"]+)">([^(]+)\((\d+)%\)</A>\s*<TD><A HREF="http://moss\.stanford\.edu/results/[^"]+">([^(]+)\((\d+)%\)</A>\s*<TD ALIGN=right>\d+)', html):
+            student1 = line[2].split('/')[3]
+            student2 = line[4].split('/')[3]
+            url = line[1]
+            x = max(int(line[3]), int(line[5]))
+            l = list()
+            if student1 == student2 or x < min:
+                html = html.replace(line[0], '')
+            else:
+                l.append((x, f'{student1} / {student2} ({x}%) => {url}'))
+            print('\n'.join(line for _, line in sorted(l)[::-1]))
+        with open("report.html", 'w') as f:
+            f.write(html)
     return url
 
 
@@ -93,9 +118,14 @@ if __name__ == '__main__':
             raise Exception('Google Sheets URL not found')
         githubs = re.findall(r'>https://github.com/([^/]+/[^/"\\]+)<', str(r.content, encoding='utf8'))
 
+    githubs = [g for g in githubs if g.split('/')[0] not in args.exc]
+    if len(args.only) > 0:
+        githubs = [g for g in githubs if g.split('/')[0] in args.only]
     with tempfile.TemporaryDirectory() as folder:
         download_files(args.task, githubs, folder)
         url = check_plagiarism(os.path.join(folder, "*", "ex*.py"),
                                language=args.lang,
-                               output_folder=args.out)
+                               output_folder=args.out,
+                               show=args.show,
+                               min=args.min)
         print(url)

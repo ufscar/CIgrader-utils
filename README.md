@@ -14,7 +14,9 @@ Use example:
 python3 check_plagiarism.py \
   -l python \
   -s <sheet_id> \
-  -t lista01
+  -t lista01 \
+  --show \
+  --min 30
 ```
 
 ### Environment Variables

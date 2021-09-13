@@ -73,16 +73,17 @@ def check_plagiarism(pattern, language, output_folder=None, show=False, min=0):
         for line in re.findall(r'(<TR><TD><A HREF="(http://moss\.stanford\.edu/results/[^"]+)">([^(]+)\((\d+)%\)</A>\s*<TD><A HREF="http://moss\.stanford\.edu/results/[^"]+">([^(]+)\((\d+)%\)</A>\s*<TD ALIGN=right>\d+)', html):
             student1 = line[2].split('/')[3]
             student2 = line[4].split('/')[3]
-            url = line[1]
+            urli = line[1]
             x = max(int(line[3]), int(line[5]))
             file1 = line[2].split('/')[-1].strip()
             file2 = line[4].split('/')[-1].strip()
             if student1 == student2 or x < min:
                 html = html.replace(line[0], '')
             else:
-                l.append((x, f'{url} => {student1} ({file1}) / {student2} ({file2}) ({x}%)'))
+                l.append((x, f'{urli} => {student1} ({file1}) / {student2} ({file2}) ({x}%)'))
         output = '\n'.join(line for _, line in sorted(l)[::-1])
         print(output)
+        print(f'{len(l)} pares detectados!')
         if output_folder is None:
             os.remove(report_html)
         else:

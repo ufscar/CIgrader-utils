@@ -77,7 +77,7 @@ def check_plagiarism(pattern, language, output_folder=None, show=False, min=0):
                 html = html.replace(line[0], '')
             else:
                 l.append((x, f'{student1} / {student2} ({x}%) => {url}'))
-        output = '\n'.join(line for _, line in sorted(l))
+        output = '\n'.join(line for _, line in sorted(l)[::-1])
         print(output)
         if output_folder is None:
             os.remove(report_html)

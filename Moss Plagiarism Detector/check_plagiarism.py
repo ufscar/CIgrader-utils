@@ -7,6 +7,9 @@ import github3
 import tempfile
 import dotenv
 
+report_html = "report.html"
+report_txt = "report.txt"
+
 
 def parse_input():
     parser = argparse.ArgumentParser(description="Check for plagiarism one task of all students")
@@ -64,19 +67,23 @@ def check_plagiarism(pattern, language, output_folder=None, show=False, min=0):
         m.saveWebPage(url, "report.html")
         with open("report.html") as f:
             html = f.read()
+        l = list()
         for line in re.findall(r'(<TR><TD><A HREF="(http://moss\.stanford\.edu/results/[^"]+)">([^(]+)\((\d+)%\)</A>\s*<TD><A HREF="http://moss\.stanford\.edu/results/[^"]+">([^(]+)\((\d+)%\)</A>\s*<TD ALIGN=right>\d+)', html):
             student1 = line[2].split('/')[3]
             student2 = line[4].split('/')[3]
             url = line[1]
             x = max(int(line[3]), int(line[5]))
-            l = list()
             if student1 == student2 or x < min:
                 html = html.replace(line[0], '')
             else:
                 l.append((x, f'{student1} / {student2} ({x}%) => {url}'))
-            print('\n'.join(line for _, line in sorted(l)[::-1]))
-        with open("report.html", 'w') as f:
-            f.write(html)
+        output = '\n'.join(line for _, line in sorted(l))
+        print(output)
+        if output_folder is None:
+            os.remove(report_html)
+        else:
+            with open(report_txt, 'w') as f:
+                f.write(output)
     return url
 
 

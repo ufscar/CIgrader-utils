@@ -80,7 +80,7 @@ def check_plagiarism(pattern, language, output_folder=None, show=False, min=0):
             if student1 == student2 or x < min:
                 html = html.replace(line[0], '')
             else:
-                l.append((x, f'{student1} ({file1}) / {student2} ({file2}) ({x}%) =>\t{url}'))
+                l.append((x, f'{url} => {student1} ({file1}) / {student2} ({file2}) ({x}%)'))
         output = '\n'.join(line for _, line in sorted(l)[::-1])
         print(output)
         if output_folder is None:

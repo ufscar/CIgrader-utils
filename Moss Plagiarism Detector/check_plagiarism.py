@@ -35,6 +35,8 @@ def parse_input():
                         help="Show results in standard output")
     parser.add_argument("-X", "--exclude-files", dest="excf", action='append', default=[],
                         help="Files not to be checked")
+    parser.add_argument("-e", "--equals", dest="equals", action='store_true', default=False,
+                        help="Just compare files with the same filenames")
 
     args = parser.parse_args()
     if args.file is not None and not os.path.exists(args.file):
@@ -56,8 +58,8 @@ def check_plagiarism(pattern, language, output_folder=None, show=False, min=0):
     url = m.send(lambda file_path, display_name: print('*', end='', flush=True))
     print()
 
+    m.saveWebPage(url, report_html)
     if output_folder is not None:
-        m.saveWebPage(url, report_html)
         mosspy.download_report(url,
                                output_folder,
                                connections=8,
@@ -66,7 +68,6 @@ def check_plagiarism(pattern, language, output_folder=None, show=False, min=0):
                                )
         print()
     if show:
-        m.saveWebPage(url, report_html)
         with open(report_html) as f:
             html = f.read()
         l = list()
@@ -86,9 +87,8 @@ def check_plagiarism(pattern, language, output_folder=None, show=False, min=0):
         print(f'{len(l)} pares detectados!')
         if output_folder is None:
             os.remove(report_html)
-        else:
-            with open(report_txt, 'w') as f:
-                f.write(output)
+        with open(report_txt, 'w') as f:
+            f.write(output)
     return url
 
 
@@ -97,7 +97,7 @@ def download_files(task, githubs, folder, exclude_files=None):
         exclude_files = []
     git = github3.GitHub(token=os.getenv('GITHUB_TOKEN'))
     for own_repo in githubs:
-        print(own_repo, end='\t')
+        print(own_repo)
         student, repo = own_repo.split('/')
         if repo.endswith('.git'):
             repo = repo[:-4]
@@ -110,10 +110,13 @@ def download_files(task, githubs, folder, exclude_files=None):
                     os.makedirs(student_folder)
                 exs = repo.directory_contents(task)
                 for ex in exs:
-                    if ex[0] not in exclude_files:
-                        with open(os.path.join(student_folder, ex[0]), 'wb') as f:
-                            f.write(repo.file_contents(ex[1].path).decoded)
-            print()
+                    try:
+                        if ex[0] not in exclude_files:
+                            print(ex[0])
+                            with open(os.path.join(student_folder, ex[0]), 'wb') as f:
+                                f.write(repo.file_contents(ex[1].path).decoded)
+                    except Exception as err:
+                        print(err)
         except github3.exceptions.NotFoundError as err:
             print(f'NOT FOUND: {err}')
             continue
@@ -143,5 +146,6 @@ if __name__ == '__main__':
                                language=args.lang,
                                output_folder=args.out,
                                show=args.show,
-                               min=args.min)
+                               min=args.min,
+                               just_equals=args.equals)
         print(url)

@@ -78,7 +78,7 @@ def check_plagiarism(pattern, language, output_folder=None, show=False, min=0, o
             x = max(int(line[3]), int(line[5]))
             file1 = line[2].split('/')[-1].strip()
             file2 = line[4].split('/')[-1].strip()
-            if student1 == student2 or x < min or (only_equals and file1 == file2):
+            if student1 == student2 or x < min or (only_equals and file1 != file2):
                 html = html.replace(line[0], '')
             else:
                 l.append((x, f'{urli} => {student1} ({file1}) / {student2} ({file2}) ({x}%)'))

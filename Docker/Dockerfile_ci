@@ -1,0 +1,8 @@
+FROM gldecurtins/chia-docker:latest
+
+MAINTAINER Secretaria Geral de Informática
+
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt update -y && apt install -y python3 python3-pip python3-tk xvfb
+RUN python3 -m pip install requests github3.py numpy scipy pandas sympy faker py-sudoku pycryptodome
+RUN echo ${PATH}

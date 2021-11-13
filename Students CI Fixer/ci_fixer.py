@@ -54,7 +54,7 @@ def update_files(students, prof, files):
                 print(f_sha, f_path, end='\t\t')
                 contents = repo.file_contents(path=f_path)
                 if f_sha != contents.sha:
-                    contents.update(message=f'update CI file "{f_path}"',
+                    contents.update(message=f'update CI file "{f_path}" [skip ci]',
                                     content=f_content
                                     )
                     print('UPDATED NOW')

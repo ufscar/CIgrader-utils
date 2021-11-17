@@ -6,5 +6,6 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN apt update -y && apt install -y --no-install-recommends python3 python3-pip python3-setuptools python3-dev binutils
 RUN python3 -m pip install wheel
 RUN python3 -m pip install pyinstaller
-RUN python3 -m pip install pytz faker requests numpy scipy pandas sympy faker py-sudoku pycryptodome
+RUN python3 -m pip install pytz faker requests numpy scipy pandas sympy faker py-sudoku pycryptodome z3-solver
+RUN python3 -m pip install sklearn
 RUN python3 --version

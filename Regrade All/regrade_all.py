@@ -17,11 +17,17 @@ def parse_input():
     group.add_argument("-s", "--sheet", dest="sheet",
                        help="Public Google Sheets url (or id) with list of students' "
                             "github links (https://github.com/[^/]+/[^/]+)")
+    parser.add_argument("-p", "--prof-repository", dest="prof",
+                        help="Professor repository")
+    parser.add_argument("-t", "--task", dest="task", help="Task to be grades")
 
     args = parser.parse_args()
 
     if args.sheet is not None and 'https://docs.google.com/spreadsheets' not in args.sheet:
         args.sheet = f'https://docs.google.com/spreadsheets/d/{args.sheet}/edit'
+
+    if args.task is not None and args.prof is None:
+        parser.error('--task requires --prof-repository')
 
     return args
 
@@ -64,4 +70,10 @@ if __name__ == '__main__':
             raise Exception('Google Sheets URL not found')
         githubs = re.findall(r'>https://github.com/([^/]+/[^/"\\]+)<', str(r.content, encoding='utf8'))
 
-    regrade(githubs)
+    if args.task is None:
+        regrade(githubs)
+    else:
+        curr = os.path.split(os.path.abspath(__file__))[0]
+        print(curr)
+        for github in githubs:
+            os.system(f'python3 "{curr}/../Local Grader/grade.py" -p {args.prof} -t {args.task} -r {github}')

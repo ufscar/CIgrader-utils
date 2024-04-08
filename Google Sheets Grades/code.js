@@ -1,7 +1,6 @@
 const github_user = getSecret('github_user');//professor username
 const github_token = getSecret('github_token');//Github token with workflow scope
-const user_token = Utilities.base64Encode(github_user+':'+github_token);
-const headers = {'Authorization': 'Basic ' + user_token};
+const headers = {'Authorization': 'token ' + github_token};
 const get_params = {method: 'GET', headers: headers};
 
 const prof_repo = 'ufscar-2021-1-PA-listas';

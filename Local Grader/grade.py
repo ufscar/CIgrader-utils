@@ -27,7 +27,7 @@ def is_json(s):
 
 
 def parse_input():
-    parser = argparse.ArgumentParser(description="Check for plagiarism one task of all students")
+    parser = argparse.ArgumentParser(description="Grade a task from student")
     parser.add_argument("-t", "--task", dest="task", required=True,
                         help="Task to be tested")
     parser.add_argument("-r", "--repository", dest="repo", required=True,

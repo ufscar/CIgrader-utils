@@ -23,8 +23,11 @@ def parse_input():
 
     args = parser.parse_args()
 
-    if args.sheet is not None and 'https://docs.google.com/spreadsheets' not in args.sheet:
-        args.sheet = f'https://docs.google.com/spreadsheets/d/{args.sheet}/edit'
+    if args.sheet is not None and 'spreadsheets.google.com' not in args.sheet:
+        #args.sheet = f'https://docs.google.com/spreadsheets/d/{args.sheet}/edit'
+        if 'docs.google.com/spreadsheets' in args.sheet:
+            args.sheet = args.sheet.split('/d/')[1].split('/')[0]
+        args.sheet = f'https://spreadsheets.google.com/tq?tqx=out:html&tq=&key={args.sheet}'
 
     return args
 
@@ -79,7 +82,8 @@ if __name__ == '__main__':
         r = requests.get(args.sheet)
         if not r.ok:
             raise Exception('Google Sheets URL not found')
-        githubs = re.findall(r'>https://github.com/([^/]+/[^/"\\]+)<', str(r.content, encoding='utf8'))
+        githubs = re.findall(r'>https://github.com/([^/]+/[^/"\\]+)<', 
+                             str(r.content, encoding='utf8'))
 
     args.prof_github = args.prof_github.replace('https://github.com/', '')
     with tempfile.TemporaryDirectory() as folder:

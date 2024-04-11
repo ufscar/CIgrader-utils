@@ -49,7 +49,11 @@ def update_files(students, prof, files):
         try:
             repo = git.repository(student, repo)
             st_sha = [f for f in repo.directory_contents('')
-                      if f[0] == '.github'][0][1].as_dict()['sha']
+                      if f[0] == '.github']
+            if len(st_sha) > 0:
+                st_sha = st_sha[0][1].as_dict()['sha']
+            else:
+                st_sha = 'nao_encontrado'
             print(st_sha, own_repo)
             if st_sha == sha:
                 continue
@@ -65,7 +69,7 @@ def update_files(students, prof, files):
                     print('WAS ALREADY UPDATED')
 
         except github3.exceptions.NotFoundError as err:
-            print(f'NOT FOUND: {err}')
+            print(f'{own_repo} NOT FOUND: {err}')
             continue
     return sha
 

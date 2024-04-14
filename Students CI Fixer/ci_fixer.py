@@ -59,14 +59,21 @@ def update_files(students, prof, files):
                 continue
             for f_path, f_sha, f_content in files:
                 print(f_sha, f_path, end='\t\t')
-                contents = repo.file_contents(path=f_path)
-                if f_sha != contents.sha:
-                    contents.update(message=f'update CI file "{f_path}" [skip ci]',
-                                    content=f_content
-                                    )
+                try:
+                    contents = repo.file_contents(path=f_path)
+                    if f_sha != contents.sha:
+                        contents.update(message=f'update CI file "{f_path}" [skip ci]',
+                                        content=f_content
+                                        )
+                        print('UPDATED NOW')
+                    else:
+                        print('WAS ALREADY UPDATED')
+                except github3.exceptions.NotFoundError:
+                    repo.create_file(path=f_path,
+                                     message=f'Create CI file "{f_path}" [skip ci]',
+                                     content=f_content
+                                     )
                     print('UPDATED NOW')
-                else:
-                    print('WAS ALREADY UPDATED')
 
         except github3.exceptions.NotFoundError as err:
             print(f'{own_repo} NOT FOUND: {err}')

@@ -26,7 +26,13 @@ python3 check_plagiarism.py \
 
 ## Grades Sheet Script
 
-Example of script for Google Sheets automation. It depends on Worksheet template, so you will have to make some changes depending on it. This script was made for the Worksheet Template available [here](https://docs.google.com/spreadsheets/d/1jYErsQ6RZ1YrRJOFf2xQk8ZPdC8WjC8MIDFfxcJRCqA/edit?usp=sharing).
+Example of script for Google Sheets automation. It depends on Worksheet template, so you will have to make some changes depending on it. This script was made for the Worksheet Template available [here](https://docs.google.com/spreadsheets/d/1jYErsQ6RZ1YrRJOFf2xQk8ZPdC8WjC8MIDFfxcJRCqA/edit?usp=sharing). 
+
+If you prefer, there is a public library too:
+
+```
+AKfycbzAlTc-Tm6wJm9qyiMukR9csZ6yFDs_anyUEicujrYRL415ISeRG4IpMCySdmipTGOs
+```
 
 ## Students CI Fixer
 

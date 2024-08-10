@@ -31,7 +31,7 @@ Example of script for Google Sheets automation. It depends on Worksheet template
 If you prefer, there is a public library too:
 
 ```
-AKfycbzAlTc-Tm6wJm9qyiMukR9csZ6yFDs_anyUEicujrYRL415ISeRG4IpMCySdmipTGOs
+1x9FJJWvuo_vrcE7DA2bE8Jpz-c64FJzE-JZwSGRGN8eaV9bYX-C-pVtC
 ```
 
 ## Students CI Fixer
